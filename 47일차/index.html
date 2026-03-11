@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpendScope - Mobile Scaled</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        :root { 
+            --primary-blue: #2563EB; 
+            --primary-light: #dbeafe;
+            --bg-gray: #f9fafb; 
+            --text-dark: #111827; 
+            --text-gray: #6b7280; 
+            --food-color: #2563EB; 
+        }
+        body { margin: 0; font-family: 'Inter', -apple-system, sans-serif; background-color: #f3f4f6; color: var(--text-dark); }
+        .app-container { max-width: 480px; margin: 0 auto; background: var(--bg-gray); min-height: 100vh; position: relative; padding-bottom: 100px; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
+        
+        /* Layout & Animation */
+        .screen { padding: 28px; animation: fadeIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .screen-title { font-size: 22px; font-weight: 800; text-align: center; margin-bottom: 30px; letter-spacing: -0.02em; }
+
+        /* Scaled Typography Hierarchy */
+        .d-28 { font-size: 28px; font-weight: 800; letter-spacing: -0.04em; }
+        .h-20 { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+        .b-18 { font-size: 18px; font-weight: 600; }
+        .c-14 { font-size: 14px; color: var(--text-gray); font-weight: 500; }
+
+        /* Summary Box */
+        .summary-box { display: flex; gap: 16px; margin-bottom: 36px; }
+        .sum-card { flex: 1; background: white; padding: 24px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); display: flex; flex-direction: column; gap: 8px; }
+        
+        /* Conic Chart Scaled */
+        .conic-chart { width: 220px; height: 220px; border-radius: 50%; margin: 0 auto 24px; position: relative; cursor: pointer; transition: 0.3s; }
+        .conic-chart:active { transform: scale(0.95); }
+        .conic-chart::after { content: ""; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 150px; height: 150px; background: var(--bg-gray); border-radius: 50%; }
+        
+        .chart-legend { display: flex; gap: 16px; justify-content: center; margin-bottom: 40px; }
+        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: var(--text-gray); }
+        .legend-dot { width: 12px; height: 12px; border-radius: 3px; }
+
+        /* Scaled Transaction Cards */
+        .t-group { margin-bottom: 30px; }
+        .t-date { font-size: 14px; font-weight: 800; color: var(--text-gray); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .t-card { display: flex; align-items: center; background: white; padding: 20px 24px; border-radius: 18px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); min-height: 84px; transition: 0.2s; }
+        .t-card:active { background: #f8fafc; transform: scale(0.98); }
+        .t-icon { width: 48px; height: 48px; background: #f3f4f6; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin-right: 18px; font-size: 24px; }
+        .t-info { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+        .t-name { font-size: 18px; font-weight: 700; color: var(--text-dark); }
+        .t-sub { font-size: 14px; color: var(--text-gray); font-weight: 500; }
+        .t-amt { font-size: 19px; font-weight: 900; color: #ef4444; letter-spacing: -0.01em; }
+
+        /* Scaled Form & Buttons */
+        .input-group { margin-bottom: 28px; }
+        .input-hero { width: 100%; border: none; border-bottom: 2px solid #e5e7eb; background: transparent; font-size: 40px; font-weight: 800; padding: 16px 0; outline: none; transition: 0.3s; }
+        .input-hero:focus { border-bottom-color: var(--primary-blue); }
+        .tag-container { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+        .tag-btn { padding: 12px 18px; border: 1.5px solid #e5e7eb; border-radius: 12px; background: white; font-size: 15px; font-weight: 600; cursor: pointer; transition: 0.2s; min-height: 48px; display: flex; align-items: center; }
+        .tag-btn--active { background: var(--text-dark); color: white; border-color: var(--text-dark); }
+        .btn-large { width: 100%; height: 64px; border-radius: 16px; background: var(--primary-blue); color: white; font-size: 18px; font-weight: 800; border: none; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
+        .btn-large:active { transform: scale(0.97); opacity: 0.9; }
+
+        /* Analytics Scaled */
+        .analytics-box { background: white; padding: 28px; border-radius: 20px; border: 2.5px solid transparent; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .analytics-box--active { border-color: var(--primary-blue); transform: scale(1.02); box-shadow: 0 20px 40px rgba(37, 99, 235, 0.12); }
+        .bar-track { width: 100%; height: 10px; background: #f1f3f5; border-radius: 5px; margin-top: 12px; }
+
+        /* Filter bar */
+        .filter-scroller { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 20px; scrollbar-width: none; }
+        .filter-scroller::-webkit-scrollbar { display: none; }
+        .f-pill { padding: 10px 20px; border-radius: 24px; border: 1.5px solid #e5e7eb; background: white; font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: 0.2s; min-height: 44px; display: flex; align-items: center; }
+        .f-pill--active { background: var(--primary-blue); color: white; border-color: var(--primary-blue); }
+
+        /* Bottom Tab Nav Scaled */
+        .tab-bar { position: fixed; bottom: 0; width: 100%; max-width: 480px; height: 84px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #eee; z-index: 1000; padding-bottom: 12px; }
+        .tab-btn { display: flex; flex-direction: column; align-items: center; color: #9ca3af; border: none; background: none; cursor: pointer; gap: 4px; flex: 1; padding: 12px 0; }
+        .tab-btn--active { color: var(--primary-blue); font-weight: 800; }
+        .tab-icon { font-size: 24px; }
+        .tab-label { font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useMemo } = React;
+
+        const App = () => {
+            const [activeTab, setActiveTab] = useState('home');
+            const [isFocused, setIsFocused] = useState(false);
+            
+            const [expenses, setExpenses] = useState([
+                { id: 1, amount: 15000, category: '식비', subCategory: 'Dining Out', date: '오늘', memo: '점심 한식 뷔페' },
+                { id: 2, amount: 12000, category: '식비', subCategory: 'Grocery', date: '오늘', memo: '계란, 과일 번들' },
+                { id: 3, amount: 8400, category: '교통', subCategory: null, date: '어제', memo: '광역 버스 요금' },
+                { id: 4, amount: 5500, category: '카페', subCategory: null, date: '어제', memo: '디카페인 카페라떼' },
+                { id: 5, amount: 48000, category: '쇼핑', subCategory: null, date: '2026-03-09', memo: '봄 시즌 맨투맨' }
+            ]);
+
+            const foodTotal = useMemo(() => expenses.filter(e => e.category === '식비').reduce((a, b) => a + b.amount, 0), [expenses]);
+            const grandTotal = useMemo(() => expenses.reduce((a, b) => a + b.amount, 0), [expenses]);
+
+            const onAdd = (item) => {
+                setExpenses([{...item, id: Date.now()}, ...expenses]);
+                setActiveTab('transactions');
+            };
+
+            const getIcon = (cat) => {
+                const icons = { '식비': '🍴', '카페': '☕', '교통': '🚌', '쇼핑': '🛍️', '기타': '💸' };
+                return icons[cat] || '📄';
+            };
+
+            return (
+                <div className="app-container">
+                    {/* Screen Router */}
+                    {activeTab === 'home' && <Home total={grandTotal} food={foodTotal} list={expenses.slice(0, 3)} iconFn={getIcon} />}
+                    {activeTab === 'transactions' && <Transactions list={expenses} iconFn={getIcon} />}
+                    {activeTab === 'add' && <Add onSave={onAdd} />}
+                    {activeTab === 'analytics' && <Analytics total={grandTotal} list={expenses} focused={isFocused} setFocused={setIsFocused} />}
+
+                    <nav className="tab-bar">
+                        {[
+                            { id: 'home', icon: '🏠', label: 'Home' },
+                            { id: 'transactions', icon: '📄', label: 'Hisotry' },
+                            { id: 'add', icon: '➕', label: 'Add' },
+                            { id: 'analytics', icon: '📊', label: 'Stat' }
+                        ].map(t => (
+                            <button key={t.id} className={`tab-btn ${activeTab === t.id ? 'tab-btn--active' : ''}`} onClick={() => setActiveTab(t.id)}>
+                                <span className="tab-icon">{t.icon}</span>
+                                <span className="tab-label">{t.label}</span>
+                            </button>
+                        ))}
+                    </nav>
+                </div>
+            );
+        };
+
+        const Home = ({ total, food, list, iconFn }) => (
+            <div className="screen">
+                <header className="screen-title">SpendScope</header>
+                <div className="summary-box">
+                    <div className="sum-card"><span className="c-14">Monthly Total</span><span className="d-28">${total.toLocaleString()}</span></div>
+                    <div className="sum-card"><span className="c-14">Food Spending</span><span className="d-28">${food.toLocaleString()}</span></div>
+                </div>
+                <div className="conic-chart" style={{background: 'conic-gradient(var(--food-color) 0% 54%, #3b82f6 54% 80%, #cbd5e1 80% 100%)'}}></div>
+                <div className="chart-legend">
+                    <div className="legend-item"><span className="legend-dot" style={{background:'var(--food-color)'}}></span>식비</div>
+                    <div className="legend-item"><span className="legend-dot" style={{background:'#3b82f6'}}></span>교통</div>
+                    <div className="legend-item"><span className="legend-dot" style={{background:'#cbd5e1'}}></span>기타</div>
+                </div>
+                <h2 className="h-20" style={{marginBottom: '20px'}}>Recent Expenses</h2>
+                {list.map(i => (
+                    <div key={i.id} className="t-card">
+                        <div className="t-icon">{iconFn(i.category)}</div>
+                        <div className="t-info"><div className="t-name">{i.memo || i.category}</div><div className="t-sub">{i.category} • {i.date}</div></div>
+                        <div className="t-amt">-${i.amount.toLocaleString()}</div>
+                    </div>
+                ))}
+            </div>
+        );
+
+        const Transactions = ({ list, iconFn }) => {
+            const [filter, setFilter] = useState('전체');
+            const filtered = filter === '전체' ? list : list.filter(e => e.category === filter);
+            const grouped = filtered.reduce((acc, curr) => {
+                if (!acc[curr.date]) acc[curr.date] = [];
+                acc[curr.date].push(curr);
+                return acc;
+            }, {});
+
+            return (
+                <div className="screen">
+                    <h1 className="screen-title">All Transactions</h1>
+                    <div className="filter-scroller">
+                        {['전체', '식비', '교통', '카페', '쇼핑'].map(c => (
+                            <button key={c} className={`f-pill ${filter === c ? 'f-pill--active' : ''}`} onClick={() => setFilter(c)}>{c}</button>
+                        ))}
+                    </div>
+                    {Object.entries(grouped).map(([date, items]) => (
+                        <div key={date} className="t-group">
+                            <div className="t-date">{date}</div>
+                            {items.map(i => (
+                                <div key={i.id} className="t-card">
+                                    <div className="t-icon">{iconFn(i.category)}</div>
+                                    <div className="t-info"><div className="t-name">{i.category}</div><div className="t-sub">{i.memo}</div></div>
+                                    <div className="t-amt">-${i.amount.toLocaleString()}</div>
+                                </div>
+                            ))}
+                        </div>
+                    ))}
+                </div>
+            );
+        };
+
+        const Add = ({ onSave }) => {
+            const [amt, setAmt] = useState('');
+            const [cat, setCat] = useState('식비');
+            const [memo, setMemo] = useState('');
+
+            return (
+                <div className="screen">
+                    <h1 className="screen-title">Add Expense</h1>
+                    <div className="input-group">
+                        <label className="c-14">AMOUNT (KRW)</label>
+                        <input className="input-hero" type="number" placeholder="0" value={amt} onChange={e => setAmt(e.target.value)} autoFocus />
+                    </div>
+                    <div className="input-group">
+                        <label className="c-14">CATEGORY</label>
+                        <div className="tag-container">
+                            {['식비', '교통', '카페', '쇼핑', '기타'].map(c => (
+                                <button key={c} className={`tag-btn ${cat === c ? 'tag-btn--active' : ''}`} onClick={() => setCat(c)}>{c}</button>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="input-group">
+                        <label className="c-14">MEMO</label>
+                        <input className="input-hero" style={{fontSize:'22px'}} placeholder="What was this for?" value={memo} onChange={e => setMemo(e.target.value)} />
+                    </div>
+                    <button className="btn-large" onClick={() => onSave({amount: Number(amt), category: cat, memo, date: '오늘'})}>Save Transaction</button>
+                </div>
+            );
+        };
+
+        const Analytics = ({ total, list, focused, setFocused }) => {
+            const dining = list.filter(e => e.subCategory === 'Dining Out').reduce((a, b) => a + b.amount, 0);
+            const grocery = list.filter(e => e.subCategory === 'Grocery').reduce((a, b) => a + b.amount, 0);
+            const foodAll = dining + grocery;
+            const ratio = ((foodAll / total) * 100).toFixed(1);
+
+            return (
+                <div className="screen">
+                    <h1 className="screen-title">Expenditure Analysis</h1>
+                    <div className="summary-box" style={{marginBottom:'40px'}}>
+                        <div className="sum-card" style={{flex: '1', textAlign:'center'}}>
+                            <span className="c-14">Monthly Total Expenditure</span>
+                            <div className="d-28" style={{fontSize: '32px', marginTop: '10px'}}>${total.toLocaleString()}</div>
+                        </div>
+                    </div>
+                    <div className="chart-section" style={{display:'flex', justifyContent:'center', position:'relative', marginBottom: '60px'}}>
+                        <div className="conic-chart" 
+                             onClick={() => { setFocused(true); setTimeout(() => setFocused(false), 2500); }}
+                             style={{width:'240px', height:'240px', background:`conic-gradient(var(--primary-blue) 0% ${ratio}%, #e2e8f0 ${ratio}% 100%)`}}>
+                            <div style={{position:'absolute', top:'50%', left:'50%', transform:'translate(-50%, -50%)', zIndex:10, textAlign:'center'}}>
+                                <div style={{fontSize:'24px', fontWeight:900, color:'var(--primary-blue)'}}>{ratio}%</div>
+                                <div className="c-14" style={{fontWeight:700}}>식비 비중</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className={`analytics-box ${focused ? 'analytics-box--active' : ''}`}>
+                        <div style={{display:'flex', justifyContent:'space-between', marginBottom:'24px'}}>
+                            <h3 className="h-20" style={{fontSize:'18px'}}>Food Spending Detailed</h3>
+                            <span className="h-20" style={{color:'var(--primary-blue)'}}>${foodAll.toLocaleString()}</span>
+                        </div>
+                        <Bar label="Dining Out" val={dining} max={foodAll} />
+                        <Bar label="Grocery" val={grocery} max={foodAll} sub />
+                    </div>
+                </div>
+            );
+        };
+
+        const Bar = ({ label, val, max, sub }) => (
+            <div style={{marginBottom:'20px'}}>
+                <div style={{display:'flex', justifyContent:'space-between', fontSize:'15px', fontWeight:700, marginBottom:'8px'}}><span>{label}</span><span>${val.toLocaleString()}</span></div>
+                <div className="bar-track"><div className="bar-fill" style={{width:`${(val/max)*100}%`, background: sub ? '#93c5fd' : 'var(--primary-blue)'}}></div></div>
+            </div>
+        );
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
